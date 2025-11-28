@@ -14,5 +14,15 @@
     <p>Chargement en cours...</p>
   }
 
-  <p>count {{ count }}</p>
+  <h3 class="text-xl">Actions</h3>
+  <div>
+    <p>Ajouter une tâche</p>
+    <input [(ngModel)]="newTaskLabel" type="text" placeholder="Label de la tâche">
+    <button
+      class="bg-zinc-100 border rounded cursor-pointer"
+      (click)="taskService.addTask(newTaskLabel)"
+    >
+      Ajouter
+    </button>
+  </div>
 </div>
