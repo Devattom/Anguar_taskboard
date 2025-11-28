@@ -1,1 +1,18 @@
-<p>home works!</p>
+<div>
+  <h2 class="text-2xl">Listes des tâches</h2>
+
+  @if(tasks | async; as tasks) {
+    <div class="flex gap-4">
+      @for (task of tasks; track task.id) {
+        <div class="p-6 bg-stone-100 w-1/2 shadow rounded">
+          <p>Id : {{ task.id }}</p>
+          <p>Label : {{ task.label }}</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <p>Chargement en cours...</p>
+  }
+
+  <p>count {{ count }}</p>
+</div>
