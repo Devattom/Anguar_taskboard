@@ -1,0 +1,9 @@
+header {
+  width: 100%;
+  background-color: #ECECEC;
+  padding: 10px;
+}
+nav {
+  display: flex;
+  gap: 0 10px;
+}
