@@ -17,7 +17,12 @@ describe('TaskHighlight', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should display the title in the DOM', () => {
+    component.title = 'Ma tâche';
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement;
+    expect(compiled.querySelector('p')?.textContent).toContain('Ma tâche');
   });
 });

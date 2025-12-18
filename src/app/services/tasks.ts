@@ -6,6 +6,7 @@ export type Task = {
   label: string;
   completed: boolean;
 }
+
 @Injectable({
   providedIn: 'root',
 })
@@ -25,6 +26,14 @@ export class Tasks {
   inProgressTasks$ = this.tasks$.pipe(
     map(tasks => tasks.filter(task => !task.completed)),
   );
+
+  getTasks(): Task[] {
+    return this.taskSubject.value;
+  }
+
+  clearTasks(): void {
+    this.taskSubject.next([]);
+  }
 
   addTask(label: string) {
     const currentTasks = this.taskSubject.getValue();
