@@ -20,4 +20,12 @@ describe('TaskEdit', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should emit the new value of the label', () => {
+    const spy = spyOn(component.edited, 'emit');
+
+    component.edit('New label');
+    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith('New label');
+  })
 });

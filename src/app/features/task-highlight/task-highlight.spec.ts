@@ -17,7 +17,7 @@ describe('TaskHighlight', () => {
     fixture.detectChanges();
   });
 
-  it('should display the title in the DOM', () => {
+  it('should display the title in the DOM @Input', () => {
     component.title = 'Ma tâche';
 
     fixture.detectChanges();
@@ -25,4 +25,17 @@ describe('TaskHighlight', () => {
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('p')?.textContent).toContain('Ma tâche');
   });
+
+  it('should have empty string in default', () => {
+    expect(component.title).toBe('');
+  })
+
+  it('should emit nothing on close', () => {
+    const spy = spyOn(component.closed, 'emit');
+
+    component.close();
+
+    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith();
+  })
 });
