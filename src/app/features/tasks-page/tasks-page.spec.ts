@@ -10,13 +10,22 @@ class MockTaskService {
   tasks$ = this.tasksSubject.asObservable();
 
   addTask(label: string): void {
-    const newTask = { id: 1, label, completed: false };
+    const currentTasks = this.tasksSubject.getValue();
+    const lastId = currentTasks.length > 0
+      ? currentTasks[currentTasks.length - 1].id
+      : 0;
+
+    const newTask = { id: lastId, label, completed: false };
     const tasks = this.tasksSubject.value;
     this.tasksSubject.next([...tasks, newTask]);
   }
 
   deleteTask(id: number): void {
-    // Simulation simple, pas de vraie logique
+    this.tasksSubject.next(this.tasksSubject.getValue().filter(task => task.id !== id));
+  }
+
+  getTasks() {
+    return this.tasksSubject.value;
   }
 }
 
@@ -52,4 +61,16 @@ describe('TasksPage avec Mock', () => {
       expect(tasks[0].label).toBe('mocked task');
     });
   });
+
+  it('should delete a task by id with mock', () => {
+    component.addTask('mocked task');
+
+    const newTask = mockService.getTasks()[0];
+
+    component.deleteTask(newTask);
+
+    mockService.tasks$.subscribe(tasks => {
+      expect(tasks.length).toBe(0);
+    })
+  })
 });
