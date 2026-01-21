@@ -1,74 +1,75 @@
 <section class="p-8">
   <h1 class="text-3xl mb-2">Listes des tâches</h1>
 
-  <div class="p-2">
-    <div class="border rounded px-6 py-4 mb-6">
-      <h2 class="text-xl mb-4">Mes tâches en cours</h2>
-      @if(inProgressTasks | async; as inProgressTasks) {
-        <div class="flex gap-4 flex-wrap">
-          @for (task of inProgressTasks; track task.id) {
-            <div class="p-6 bg-stone-100 w-1/4 shadow rounded">
-              <header class="flex justify-end items-center gap-4">
-                <button
-                  class="p-2 bg-blue-50 rounded cursor-pointer hover:scale-105 hover:bg-blue-200"
-                  (click)="toggleCompleted(task.id)"
-                >
-                  Terminer
-                </button>
-                <lucide-icon
-                  [img]="Pencil"
-                  class="cursor-pointer hover:text-orange-400"
-                  (click)="editTask(task.id)"
-                />
-                <lucide-icon
-                  [img]="Trash"
-                  class="cursor-pointer hover:text-red-400"
-                  (click)="deleteTask(task)"
-                />
-              </header>
-              <p>Id : {{ task.id }}</p>
-              <p>Label : {{ task.label }}</p>
-              <button class="border rounded p-1 cursor-pointer hover:bg-purple-200 mt-2" type="button" (click)="highlight(task)">Mettre en avant</button>
-            </div>
-          }
-        </div>
-      } @else {
-        <p>Chargement en cours...</p>
-      }
-    </div>
+  @if (tasks$ | async; as tasks) {
     <div class="p-2">
-      <h2 class="text-xl mb-4">Mes tâches terminées</h2>
-      @if(doneTasks | async; as doneTasks) {
-        @if (doneTasks.length === 0) {
-          <p>Aucune tâches terminées</p>
-        }
+      <div class="border rounded px-6 py-4 mb-6">
+        <h2 class="text-xl mb-4">Mes tâches en cours</h2>
         <div class="flex gap-4 flex-wrap">
-          @for (task of doneTasks; track task.id) {
-            <div class="p-6 bg-stone-50 opacity-50 w-1/4 shadow rounded">
-              <header class="flex justify-end items-center gap-4">
-                <button
-                  class="p-2 bg-blue-50 rounded cursor-pointer hover:scale-105 hover:bg-blue-200"
-                  (click)="toggleCompleted(task.id)"
-                >
-                  En cours
-                </button>
-                <lucide-icon
-                  [img]="Trash"
-                  class="cursor-pointer hover:text-red-400"
-                  (click)="deleteTask(task)"
-                />
-              </header>
-              <p>Id : {{ task.id }}</p>
-              <p class="line-through">Label : {{ task.label }}</p>
-              <button class="border rounded p-1 cursor-pointer hover:bg-purple-200 mt-2" type="button" (click)="highlight(task)">Mettre en avant</button>
-            </div>
+          @for (task of tasks; track task.id) {
+            @if (!task.completed) {
+              <div class="p-6 bg-stone-100 w-1/4 shadow rounded">
+                <header class="flex justify-end items-center gap-4">
+                  <button
+                    class="p-2 bg-blue-50 rounded cursor-pointer hover:scale-105 hover:bg-blue-200"
+                    (click)="toggleCompleted(task.id)"
+                  >
+                    Terminer
+                  </button>
+                  <lucide-icon
+                    [img]="Pencil"
+                    class="cursor-pointer hover:text-orange-400"
+                    (click)="editTask(task)"
+                  />
+                  <lucide-icon
+                    [img]="Trash"
+                    class="cursor-pointer hover:text-red-400"
+                    (click)="deleteTask(task)"
+                  />
+                </header>
+                <p>Id : {{ task.id }}</p>
+                <p>Label : {{ task.label }}</p>
+                <button class="border rounded p-1 cursor-pointer hover:bg-purple-200 mt-2" type="button" (click)="highlight(task)">Mettre en avant</button>
+              </div>
+            }
+          } @empty {
+            <p>Aucune tâches en cours</p>
           }
         </div>
-      } @else {
-        <p>Chargement en cours...</p>
-      }
+      </div>
+      <div class="p-2">
+        <h2 class="text-xl mb-4">Mes tâches terminées</h2>
+        <div class="flex gap-4 flex-wrap">
+          @for (task of tasks; track task.id) {
+            @if (task.completed) {
+              <div class="p-6 bg-stone-50 opacity-50 w-1/4 shadow rounded">
+                <header class="flex justify-end items-center gap-4">
+                  <button
+                    class="p-2 bg-blue-50 rounded cursor-pointer hover:scale-105 hover:bg-blue-200"
+                    (click)="toggleCompleted(task.id)"
+                  >
+                    En cours
+                  </button>
+                  <lucide-icon
+                    [img]="Trash"
+                    class="cursor-pointer hover:text-red-400"
+                    (click)="deleteTask(task)"
+                  />
+                </header>
+                <p>Id : {{ task.id }}</p>
+                <p class="line-through">Label : {{ task.label }}</p>
+                <button class="border rounded p-1 cursor-pointer hover:bg-purple-200 mt-2" type="button" (click)="highlight(task)">Mettre en avant</button>
+              </div>
+            }
+          } @empty {
+            <p>Aucune tâches terminées</p>
+          }
+        </div>
+      </div>
     </div>
-  </div>
+  } @else {
+    <p>Chargement en cours...</p>
+  }
 
 
   <h3 class="text-xl mb-4">Actions</h3>
@@ -90,9 +91,15 @@
         Ajouter
       </button>
     </div>
-    <div
-      #highlightContainer
-    ></div>
-    <div #editContainer></div>
+    @if (highlightedTask(); as task) {
+      <app-task-highlight [title]="task.label" (closed)="highlightedTask.set(undefined)" />
+    }
+    @if (editingTask(); as task) {
+      <app-task-edit
+        [initialLabel]="task.label"
+        (edited)="onTaskEdited($event)"
+        (cancelled)="editingTask.set(undefined)"
+      />
+    }
   </div>
 </section>

@@ -1,12 +1,9 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  ComponentRef,
-  ElementRef,
   inject,
-  OnDestroy,
   OnInit,
-  ViewChild,
-  ViewContainerRef
+  signal,
 } from '@angular/core';
 import {Task, Tasks } from "../../services/tasks";
 import {Observable} from 'rxjs';
@@ -18,56 +15,39 @@ import {TaskEdit} from '../task-edit/task-edit';
 
 @Component({
   selector: 'app-tasks-page',
-  imports: [AsyncPipe, FormsModule, LucideAngularModule],
+  imports: [AsyncPipe, FormsModule, LucideAngularModule, TaskHighlight, TaskEdit],
   templateUrl: './tasks-page.html',
   styleUrl: './tasks-page.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TasksPage implements OnInit, OnDestroy {
+export class TasksPage implements OnInit {
   readonly Trash = Trash;
   readonly Pencil = Pencil;
 
-  @ViewChild('highlightContainer', {read: ViewContainerRef}) highlightContainer!: ViewContainerRef;
-
-  @ViewChild('editContainer', {read: ViewContainerRef}) editContainer!: ViewContainerRef;
-
   taskService = inject(Tasks);
-  tasks: Observable<Task[]> = this.taskService.tasks$;
-  doneTasks: Observable<Task[]> = this.taskService.doneTasks$;
-  inProgressTasks: Observable<Task[]> = this.taskService.inProgressTasks$;
+  tasks$: Observable<Task[]> = this.taskService.tasks$;
 
   newTaskLabel : string = '';
 
-  private highlightRef?: ComponentRef<TaskHighlight>;
-  private editRef?: ComponentRef<TaskEdit>;
+  highlightedTask = signal<Task | undefined>(undefined);
+  editingTask = signal<Task | undefined>(undefined);
 
   ngOnInit() {}
 
-  ngOnDestroy() {
-    this.highlightRef?.destroy();
-    this.editRef?.destroy();
-  }
-
   highlight(task: Task) {
-    this.highlightContainer.clear();
-    this.highlightRef = this.highlightContainer.createComponent(TaskHighlight)
-    this.highlightRef.instance.title = task.label;
-
-    this.highlightRef.instance.closed.subscribe(() => {
-      this.highlightRef?.destroy();
-      this.highlightRef = undefined;
-    })
+    this.highlightedTask.set(task);
   }
 
-  editTask(taskId: number) {
-    this.editContainer.clear();
+  editTask(task: Task) {
+    this.editingTask.set(task);
+  }
 
-    this.editRef = this.editContainer.createComponent(TaskEdit);
-
-    this.editRef?.instance.edited.subscribe((label) => {
-      this.taskService.editTask(taskId, label);
-      this.editRef?.destroy();
-      this.editRef = undefined;
-    });
+  onTaskEdited(label: string) {
+    const task = this.editingTask();
+    if (task) {
+      this.taskService.editTask(task.id, label);
+      this.editingTask.set(undefined);
+    }
   }
 
   addTask(label: string) {
